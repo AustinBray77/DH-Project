@@ -16,9 +16,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  var loggedIn = true;
-  var name = "safjiowe";
-  var role = 1;
+  var loggedIn = false;
+  var name = "";
+  var role = -1;
 
   void finalizeLogin(name,role) {
     setState(() {

@@ -2,8 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_front_end/elements.dart';
-import 'package:http/http.dart';
-
+import 'package:http/http.dart' as http;
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.finalizeLogin});
 
@@ -25,14 +24,24 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void tryLogin() {
+  void tryLogin() async {
     // Makes request to server to try and login
-    Response response = Response('{"role":0}', 400);
+    http.Response response = await http.post(
+      Uri.parse("http://127.0.0.1:8000/login"), 
+      headers: <String, String> {
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode({
+        'email': email,
+        'password': password
+      })
+    );
+    
     var body = jsonDecode(response.body) as Map<String, dynamic>;
 
     if(response.statusCode == 200)
     {
-      widget.finalizeLogin(body["role"], -1);
+      widget.finalizeLogin(body["name"], body["role"]);
     } else {
       setState(() {
         loginFailed = true;

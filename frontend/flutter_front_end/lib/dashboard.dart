@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_front_end/elements.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -67,8 +68,19 @@ class _ReporterState extends State<Reporter> {
 
   LatLng? position;
 
-  void sendReport(description, color) {
-
+  void sendReport(description, color) async {
+    http.Response response = await http.post(
+      Uri.parse("http://127.0.0.1:8000/sign-up"), 
+      headers: <String, String> {
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'password': password,
+        'role': role
+      })
+    );
   }
 
   void updatePosition() async {

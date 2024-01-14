@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_front_end/elements.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key, required this.finalizeLogin});
@@ -32,12 +34,24 @@ class _SignupPageState extends State<SignupPage> {
     }
   }
 
-  void trySignup() {
-    Response response = Response('{"role": 0}', 200);
+  void trySignup() async {
+    http.Response response = await http.post(
+      Uri.parse("http://127.0.0.1:8000/sign-up"), 
+      headers: <String, String> {
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'password': password,
+        'role': role
+      })
+    );
+
     if(response.statusCode == 200)
     {
       widget.finalizeLogin(name, role);
-      Navigator.of(context).pushNamed('/');
+      Navigator.pushNamed(context, '/');
     } else {
       setState(() {
         signupFailed = true;
