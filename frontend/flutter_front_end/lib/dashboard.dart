@@ -24,9 +24,6 @@ Future<Position> determinePosition() async {
   // Test if location services are enabled.
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
-    // Location services are not enabled don't continue
-    // accessing the position and request users of the 
-    // App to enable the location services.
     return Future.error('Location services are disabled.');
   }
 
@@ -34,23 +31,15 @@ Future<Position> determinePosition() async {
   if (permission == LocationPermission.denied) {
     permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied) {
-      // Permissions are denied, next time you could try
-      // requesting permissions again (this is also where
-      // Android's shouldShowRequestPermissionRationale 
-      // returned true. According to Android guidelines
-      // your App should show an explanatory UI now.
       return Future.error('Location permissions are denied');
     }
   }
   
   if (permission == LocationPermission.deniedForever) {
-    // Permissions are denied forever, handle appropriately. 
     return Future.error(
       'Location permissions are permanently denied, we cannot request permissions.');
   } 
 
-  // When we reach here, permissions are granted and we can
-  // continue accessing the position of the device.
   return await Geolocator.getCurrentPosition();
 }
 
@@ -164,10 +153,10 @@ class _VolunteerState extends State<Volunteer> {
         Marker(
           markerId: MarkerId("Cat $i"),
           infoWindow: InfoWindow(
-            title: "${cats[i].color} Cat found on ${DateFormat('yyyy-MM-dd').format(DateTime.fromMicrosecondsSinceEpoch(cats[i].date * 1000))}",
-            snippet: cats[i].description
+            title: "${cats[i]["colour"]} Cat found on ${DateFormat('yyyy-MM-dd').format(DateTime.fromMicrosecondsSinceEpoch(cats[i]["date"] * 1000))}",
+            snippet: cats[i]["description"]
           ),
-          position: LatLng(cats[i].locationY, cats[i].locationX)
+          position: LatLng(cats[i]["locationY"], cats[i]["locationX"])
         )
       );
     }
@@ -176,18 +165,22 @@ class _VolunteerState extends State<Volunteer> {
   }
 
   void getMarkers() async {
-    /* setState(() { 
+    /*setState(() { 
       markers = assembleMarkers(
-        ["This is a crazy cat", "This is a chill car"], 
+        [{
+          descripion: "This is a crazy cat",]
+        [, "This is a chill car"], 
         ["Blue", "Grey"], 
         [-79.921798, -79.918153], 
         [43.258538, 43.265364],
         [100000000000, 1093204808]);
     }
-    ); */
+    );*/
+
+    await updatePosition();
 
     http.Response response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/app/update-map"), 
+      Uri.parse("http://127.0.0.1:8000/app/updateMap/"), 
       headers: <String, String> {
         'Content-Type': 'application/json; charset=UTF-8'
       },
@@ -199,18 +192,25 @@ class _VolunteerState extends State<Volunteer> {
         'locationY': position!.latitude
       })
     );
-
-    var body = jsonDecode(response.body);
+    print(response.body);
+    /*var body = jsonDecode(response.body) as Map<String, dynamic>;
 
     if(response.statusCode == 200) {
-      setState(() => markers = assembleMarkers(body.cats));
-    }
+      if(body.isNotEmpty) {
+        setState(() => markers = assembleMarkers(body["cats"]));
+      }
+      else {
+        setState(() => markers = {});
+      }
+    }*/
   }
 
-  void updatePosition() async {
+  Future<bool> updatePosition() async {
     var result = await determinePosition();
 
     setState(() => position = LatLng(result.latitude, result.longitude));
+
+    return true;
   }
 
   final List<DropdownMenuItem<int>> dates = [
@@ -234,7 +234,6 @@ class _VolunteerState extends State<Volunteer> {
 
   @override
   Widget build(BuildContext context) {
-    if(position == null) updatePosition();
     if(markers == null) getMarkers();
 
     return Center(

@@ -109,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:8000',
-    'http://localhost:53746'
+    'http://localhost:54169'
 ]
 
 # Internationalization

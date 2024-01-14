@@ -63,9 +63,16 @@ def signup(request):
 #Output JSON: { cats: [ { description: string, color: string, locationX: float, locationY: y, date: int, photo: image } ] } 
 #Returns a list of locations of current cats in a given radius and timeframe
 def updateMap(request):
-    info = json.loads(request)
-    cats = getCatsWithinLocationAndTime(info.locationX, info.locationY, info.time, dateDiff = info.timeDiff, radius = info.radius)
-    return Http.response(json.dumps(cats), Http.status.HTTP_200_OK)
+    if request.method == "POST":
+      playload = json.loads(request.body)
+      locationX = playload.get('locationX')
+      locationY = playload.get('locationY')
+      time = playload.get('time')
+      timeDiff = playload.get('timeDiff')
+      radius = playload.get('radius')
+      cats = getCatsWithinLocationAndTime(locationX, locationY, time, dateDiff = timeDiff, radius = radius)
+      return Http(json.dumps(cats), status = 200)
+
 
 
 #Report (post url: “/report”)
