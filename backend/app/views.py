@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 import DataQueries
+import json
 # Create your views here.
 def index(request):
     return HttpResponse("hello")
@@ -12,5 +13,11 @@ def index(request):
 #Output JSON: { role: int } + Status Code
 
 def login(request):
-    #loginData
-    pass
+    loginData = checkValidLogin(request.email, request.password)
+
+    if (loginData.successful):
+        roleDict = {"role" : loginData.role} 
+        return response(json.dumps(roleDict), status = status.HTTP_200_OK)
+    else:
+        return response(json.dumps({}), status = status.HTTP_400_BAD_REQUEST)
+
