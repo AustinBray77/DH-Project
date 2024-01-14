@@ -24,8 +24,7 @@ class _SignupPageState extends State<SignupPage> {
   final List<DropdownMenuItem<int>> roles = [
     const DropdownMenuItem(value: -1,child: Text("Select a role...")),
     const DropdownMenuItem(value: 0,child: Text("Reporter")),
-    const DropdownMenuItem(value: 1,child: Text("Volunteer")),
-    const DropdownMenuItem(value: 2,child: Text("Finder"))
+    const DropdownMenuItem(value: 1,child: Text("Volunteer"))
   ];
 
   void submitForm() {

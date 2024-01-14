@@ -192,17 +192,21 @@ class _VolunteerState extends State<Volunteer> {
         'locationY': position!.latitude
       })
     );
-    print(response.body);
-    /*var body = jsonDecode(response.body) as Map<String, dynamic>;
+    
+    try {
+      var body = jsonDecode(response.body) as Map<String, dynamic>;
 
-    if(response.statusCode == 200) {
-      if(body.isNotEmpty) {
-        setState(() => markers = assembleMarkers(body["cats"]));
+      if(response.statusCode == 200) {
+        if(body["cats"].isNotEmpty) {
+          setState(() => markers = assembleMarkers(body["cats"]));
+        }
+        else {
+          setState(() => markers = {});
+        }
       }
-      else {
-        setState(() => markers = {});
-      }
-    }*/
+    } catch (e) {
+      setState(() => markers = {});
+    }
   }
 
   Future<bool> updatePosition() async {
