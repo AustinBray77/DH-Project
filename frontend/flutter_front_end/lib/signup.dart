@@ -36,7 +36,7 @@ class _SignupPageState extends State<SignupPage> {
 
   void trySignup() async {
     http.Response response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/sign-up"), 
+      Uri.parse("http://127.0.0.1:8000/app/signup/"), 
       headers: <String, String> {
         'Content-Type': 'application/json; charset=UTF-8'
       },

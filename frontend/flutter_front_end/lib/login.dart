@@ -27,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   void tryLogin() async {
     // Makes request to server to try and login
     http.Response response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/login"), 
+      Uri.parse("http://127.0.0.1:8000/app/login/"), 
       headers: <String, String> {
         'Content-Type': 'application/json; charset=UTF-8'
       },
@@ -35,13 +35,14 @@ class _LoginPageState extends State<LoginPage> {
         'email': email,
         'password': password
       })
-    );
+    ).onError((error, stackTrace) => http.Response('{}', 400));
     
     var body = jsonDecode(response.body) as Map<String, dynamic>;
 
     if(response.statusCode == 200)
     {
       widget.finalizeLogin(body["name"], body["role"]);
+      Navigator.of(context).pushNamed("/");
     } else {
       setState(() {
         loginFailed = true;

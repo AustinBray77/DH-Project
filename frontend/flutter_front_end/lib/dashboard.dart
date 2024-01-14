@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_front_end/elements.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -70,16 +72,17 @@ class _ReporterState extends State<Reporter> {
 
   void sendReport(description, color) async {
     http.Response response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/sign-up"), 
+      Uri.parse("http://127.0.0.1:8000/app/report/"), 
       headers: <String, String> {
         'Content-Type': 'application/json; charset=UTF-8'
       },
-      body: jsonEncode({
-        'name': name,
-        'email': email,
-        'password': password,
-        'role': role
-      })
+      body: utf8.encode(jsonEncode({
+        'description': description,
+        'colour': color,
+        'locationX': position!.longitude,
+        'locationY': position!.latitude,
+        'time': (DateTime.now().millisecondsSinceEpoch / 1000.0).round()
+      }))
     );
   }
 
@@ -153,18 +156,18 @@ class _VolunteerState extends State<Volunteer> {
 
   }
 
-  Set<Marker> assembleMarkers(descriptions, colors, locXs, locYs, dates) {
+  Set<Marker> assembleMarkers(cats) {
     Set<Marker> output = {};
 
-    for(var i = 0; i < descriptions.length; i++) {
+    for(var i = 0; i < cats.length; i++) {
       output.add(
         Marker(
           markerId: MarkerId("Cat $i"),
           infoWindow: InfoWindow(
-            title: "${colors[i]} Cat found on ${DateFormat('yyyy-MM-dd').format(DateTime.fromMicrosecondsSinceEpoch(dates[i] * 1000))}",
-            snippet: descriptions[i]
+            title: "${cats[i].color} Cat found on ${DateFormat('yyyy-MM-dd').format(DateTime.fromMicrosecondsSinceEpoch(cats[i].date * 1000))}",
+            snippet: cats[i].description
           ),
-          position: LatLng(locYs[i], locXs[i])
+          position: LatLng(cats[i].locationY, cats[i].locationX)
         )
       );
     }
@@ -173,7 +176,7 @@ class _VolunteerState extends State<Volunteer> {
   }
 
   void getMarkers() async {
-    setState(() { 
+    /* setState(() { 
       markers = assembleMarkers(
         ["This is a crazy cat", "This is a chill car"], 
         ["Blue", "Grey"], 
@@ -181,7 +184,27 @@ class _VolunteerState extends State<Volunteer> {
         [43.258538, 43.265364],
         [100000000000, 1093204808]);
     }
+    ); */
+
+    http.Response response = await http.post(
+      Uri.parse("http://127.0.0.1:8000/app/update-map"), 
+      headers: <String, String> {
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode({
+        'date': (DateTime.now().microsecondsSinceEpoch / 1000.0).round(),
+        'timeDiff': dateValue,
+        'radius': radius,
+        'locationX': position!.longitude,
+        'locationY': position!.latitude
+      })
     );
+
+    var body = jsonDecode(response.body);
+
+    if(response.statusCode == 200) {
+      setState(() => markers = assembleMarkers(body.cats));
+    }
   }
 
   void updatePosition() async {
@@ -196,7 +219,7 @@ class _VolunteerState extends State<Volunteer> {
     const DropdownMenuItem(value: 604800,child: Text("Past Week")),
     const DropdownMenuItem(value: 2592000,child: Text("Past Month")),
     const DropdownMenuItem(value: 31536000,child: Text("Past Year")),
-    const DropdownMenuItem(value: -1,child: Text("All Time")),
+    const DropdownMenuItem(value: 170523872,child: Text("All Time")),
   ];
 
   var radius = 1000.0;
