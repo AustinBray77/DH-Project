@@ -120,7 +120,16 @@ def getCatsWithinLocationAndTime(centerLat, centerLong, date, radius = -1, dateD
   
   return validCats
 
+def getHighestCatId():
+  ids = redis_connection.smembers()
+  for x in range(len(ids)):
+    ids[x] = int(ids[x])
 
+  return max(ids)
+
+def removeCat(id):
+  redis_connection.delete(catPrefix + str(id))
+  redis_connection.srem(catSet, str(id))
 
   
 

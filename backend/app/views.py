@@ -38,11 +38,24 @@ def signup(request):
     else:
         return response(json.dumps({}), status = status.HTTP_400_BAD_REQUEST)
     
-# Respond (post url: “/respond”)
-# Used by volunteer and finder
-# Input JSON: { id: string, update_state: int }
-# Output: Status Code 
-# Updates information about a cat, possibly removes it from the database
+#Update Map (post url: “/update-map”)
+#Used by the volunteer
+#Input JSON: { time: int, locationX: float, locationY: float }
+#Output JSON: { cats: [ { description: string, color: string, locationX: float, locationY: y, date: int, photo: image } ] } 
+#Returns a list of locations of current cats in a given radius and timeframe
+def updateMap(request):
+    info = json.loads(request)
+    cats = getCatsWithinLocationAndTime(info.locationX, info.locationY, info.time, dateDiff = info.timeDiff, radius = info.radius)
+    return response(json.dumps(cats), status.HTTP_200_OK)
 
 
-
+#Report (post url: “/report”)
+#Used by reporter
+#Input JSON: { description: string, color: string, locationX: float, locationY: float, time: int }
+#Output: Status Code
+#Adds a cat to the database
+def reportCat(request):
+    info = json.loads(request)
+    id = getHighestCatId() + 1
+    addCat(id, info.description, info.colour, info.locationX, info.locationY, info.time)
+    return response("", status.HTTP_200_OK)
