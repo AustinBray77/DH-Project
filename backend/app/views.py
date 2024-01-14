@@ -1,10 +1,10 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse as Http
 import DataQueries
 import json
 # Create your views here.
 def index(request):
-    return HttpResponse("hello")
+    return Http.HttpResponse("hello")
 
 
 #Login (post url: “/login”)
@@ -14,13 +14,13 @@ def index(request):
 
 def login(request):
     info = json.loads(request)
-    loginData = checkValidLogin(info.email, info.password)
+    loginData = DataQueries.checkValidLogin(info.email, info.password)
 
     if (loginData.successful):
         roleDict = {"role" : loginData.role} 
-        return response(json.dumps(roleDict), status = status.HTTP_200_OK)
+        return Http.response(json.dumps(roleDict), status = Http.status.HTTP_200_OK)
     else:
-        return response(json.dumps({}), status = status.HTTP_400_BAD_REQUEST)
+        return Http.response(json.dumps({}), status = Http.status.HTTP_400_BAD_REQUEST)
 
 # SignUp (post url: “/sign-up”)
 # Used by all users
@@ -30,13 +30,13 @@ def login(request):
 
 def signup(request):
     info = json.loads(request)
-    signupData = addPerson(info.email, info.name, info.password, info.role)
+    signupData = DataQueries.addPerson(info.email, info.name, info.password, info.role)
 
     if (signupData):
         roleDict = {"role" : signupData.role}
-        return response(json.dumps(roleDict),status = status.HTTP_200_OK)
+        return Http.response(json.dumps(roleDict),status = Http.status.HTTP_200_OK)
     else:
-        return response(json.dumps({}), status = status.HTTP_400_BAD_REQUEST)
+        return Http.response(json.dumps({}), status = Http.status.HTTP_400_BAD_REQUEST)
     
 #Update Map (post url: “/update-map”)
 #Used by the volunteer
@@ -45,8 +45,8 @@ def signup(request):
 #Returns a list of locations of current cats in a given radius and timeframe
 def updateMap(request):
     info = json.loads(request)
-    cats = getCatsWithinLocationAndTime(info.locationX, info.locationY, info.time, dateDiff = info.timeDiff, radius = info.radius)
-    return response(json.dumps(cats), status.HTTP_200_OK)
+    cats = DataQueries.getCatsWithinLocationAndTime(info.locationX, info.locationY, info.time, dateDiff = info.timeDiff, radius = info.radius)
+    return Http.response(json.dumps(cats), Http.status.HTTP_200_OK)
 
 
 #Report (post url: “/report”)
@@ -56,6 +56,6 @@ def updateMap(request):
 #Adds a cat to the database
 def reportCat(request):
     info = json.loads(request)
-    id = getHighestCatId() + 1
-    addCat(id, info.description, info.colour, info.locationX, info.locationY, info.time)
-    return response("", status.HTTP_200_OK)
+    id = DataQueries.getHighestCatId() + 1
+    DataQueries.addCat(id, info.description, info.colour, info.locationX, info.locationY, info.time)
+    return Http.response("", Http.status.HTTP_200_OK)
